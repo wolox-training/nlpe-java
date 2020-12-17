@@ -1,0 +1,13 @@
+package com.wolox.training.repository;
+
+import com.wolox.training.models.Book;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface BookRepository extends JpaRepository<Book, Integer> {
+
+    Optional<Book> findTopByAuthor(String author);
+}
