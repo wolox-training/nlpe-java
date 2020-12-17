@@ -1,43 +1,53 @@
 package com.wolox.training.models;
 
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
-@Entity(name = "book")
+@Entity
 public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "genre")
+    @Column
     private String genre;
 
-    @Column(name = "author", nullable = false)
+    @Column(nullable = false)
+    @NotNull
     private String author;
 
-    @Column(name = "image", nullable = false)
+    @Column(nullable = false)
+    @NotNull
     private String image;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
+    @NotNull
     private String title;
 
-    @Column(name = "sub_title", nullable = false)
+    @Column(nullable = false)
+    @NotNull
     private String subTitle;
 
-    @Column(name = "publisher", nullable = false)
+    @Column(nullable = false)
+    @NotNull
     private String publisher;
 
-    @Column(name = "year", nullable = false)
+    @Column(nullable = false)
+    @NotNull
     private String year;
 
-    @Column(name = "pages", nullable = false)
+    @Column(nullable = false)
+    @NotNull
     private int pages;
 
-    @Column(name = "isbn", nullable = false)
+    @Column(nullable = false)
+    @NotNull
     private String isbn;
 
     public Book() {
@@ -47,90 +57,79 @@ public class Book {
         return id;
     }
 
-    public Book setId(int id) {
+    public void setId(int id) {
         this.id = id;
-        return this;
     }
 
     public String getGenre() {
         return genre;
     }
 
-    public Book setGenre(String genre) {
+    public void setGenre(String genre) {
         this.genre = genre;
-        return this;
     }
 
     public String getAuthor() {
         return author;
     }
 
-    public Book setAuthor(String author) {
+    public void setAuthor(String author) {
         this.author = author;
-        return this;
     }
 
     public String getImage() {
         return image;
     }
 
-    public Book setImage(String image) {
+    public void setImage(String image) {
         this.image = image;
-        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public Book setTitle(String title) {
+    public void setTitle(String title) {
         this.title = title;
-        return this;
     }
 
     public String getSubTitle() {
         return subTitle;
     }
 
-    public Book setSubTitle(String subTitle) {
+    public void setSubTitle(String subTitle) {
         this.subTitle = subTitle;
-        return this;
     }
 
     public String getPublisher() {
         return publisher;
     }
 
-    public Book setPublisher(String publisher) {
+    public void setPublisher(String publisher) {
         this.publisher = publisher;
-        return this;
     }
 
     public String getYear() {
         return year;
     }
 
-    public Book setYear(String year) {
+    public void setYear(String year) {
         this.year = year;
-        return this;
     }
 
     public int getPages() {
         return pages;
     }
 
-    public Book setPages(int pages) {
+    public void setPages(int pages) {
         this.pages = pages;
-        return this;
     }
 
     public String getIsbn() {
         return isbn;
     }
 
-    public Book setIsbn(String isbn) {
+    public void setIsbn(String isbn) {
         this.isbn = isbn;
-        return this;
     }
-
 }
