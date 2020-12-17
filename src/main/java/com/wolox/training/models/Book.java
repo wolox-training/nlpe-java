@@ -30,7 +30,7 @@ public class Book {
     @NotNull
     private String title;
 
-    @Column(nullable = false)
+    @Column(name = "sub_title", nullable = false)
     @NotNull
     private String subTitle;
 
