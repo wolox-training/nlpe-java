@@ -26,7 +26,7 @@ public class BookController {
     /**
      * This method return a collection of {@link Book}
      *
-     * @return Collections of {@link Book}
+     * @return Collection of {@link Book}
      */
     @GetMapping
     public Iterable<Book> findAll() {
@@ -48,7 +48,7 @@ public class BookController {
     /**
      * This method update a {@link Book} if exist with the following params:
      *
-     * @param book: Data with structure like a book to update
+     * @param book: Data with structure like a Book to update
      * @param id: Id of book to update
      * @return Updated {@link Book}
      * @throws BookIdMismatchException: When book id is not equals with id param
