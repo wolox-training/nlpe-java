@@ -8,6 +8,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
+/**
+ * This class represent the Book Entity
+ */
 @Entity
 public class Book {
 
@@ -46,6 +49,9 @@ public class Book {
     @NotNull
     private int pages;
 
+    /**
+     * This mean "International Standard Book Number" code
+     */
     @Column(nullable = false)
     @NotNull
     private String isbn;

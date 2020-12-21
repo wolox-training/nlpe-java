@@ -23,17 +23,37 @@ public class BookController {
     @Autowired
     private BookRepository bookRepository;
 
+    /**
+     * This method return a collection of {@link Book}
+     *
+     * @return Collections of {@link Book}
+     */
     @GetMapping
     public Iterable<Book> findAll() {
         return bookRepository.findAll();
     }
 
+    /**
+     * This method creates a {@link Book} with the following param:
+     *
+     * @param book: Data with structure like a Book to create
+     * @return Created {@link Book} with attributes passed in the param
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Book create(@RequestBody Book book) {
         return bookRepository.save(book);
     }
 
+    /**
+     * This method update a {@link Book} if exist with the following params:
+     *
+     * @param book: Data with structure like a book to update
+     * @param id: Id of book to update
+     * @return Updated {@link Book}
+     * @throws BookIdMismatchException: When book id is not equals with id param
+     * @throws BookNotFoundException: When the book not found with id param passed
+     */
     @PutMapping("{id}")
     public Book update(@RequestBody Book book, @PathVariable(name = "id") int id) throws BookIdMismatchException, BookNotFoundException {
         if (book.getId() != id) {
@@ -44,6 +64,12 @@ public class BookController {
         return bookRepository.save(book);
     }
 
+    /**
+     * This method delete a {@link Book} if exist with the following params:
+     *
+     * @param id: Id of the book to delete
+     * @throws BookNotFoundException: When the book not found with id param passed
+     */
     @DeleteMapping("{id}")
     public void delete(@PathVariable(name = "id") int id) throws BookNotFoundException {
         bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException("Book Not found"));
