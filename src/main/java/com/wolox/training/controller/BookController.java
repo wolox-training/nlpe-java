@@ -49,10 +49,10 @@ public class BookController {
      * This method update a {@link Book} if exist with the following params:
      *
      * @param book: Data with structure like a book to update
-     * @param id: Id of book to update
+     * @param id:   Id of book to update
      * @return Updated {@link Book}
      * @throws BookIdMismatchException: When book id is not equals with id param
-     * @throws BookNotFoundException: When the book not found with id param passed
+     * @throws BookNotFoundException:   When the book not found with id param passed
      */
     @PutMapping("{id}")
     public Book update(@RequestBody Book book, @PathVariable(name = "id") int id) throws BookIdMismatchException, BookNotFoundException {
