@@ -29,7 +29,7 @@ public class ErrorHandler {
             ConstraintViolationException.class,
             DataIntegrityViolationException.class
     })
-    public ResponseEntity<Object> handleBadRequest(Exception ex) {
+    public ResponseEntity<Response> handleBadRequest(Exception ex) {
 
         Response response = new Response(ex.getMessage());
         if (ex instanceof ConstraintViolationException) {
