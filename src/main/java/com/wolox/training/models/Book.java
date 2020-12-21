@@ -49,6 +49,9 @@ public class Book {
     @NotNull
     private int pages;
 
+    /**
+     * This mean "International Standard Book Number" code
+     */
     @Column(nullable = false)
     @NotNull
     private String isbn;
