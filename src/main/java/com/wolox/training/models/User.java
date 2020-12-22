@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class represent the User entity
@@ -30,13 +31,16 @@ public class User {
     private int id;
 
     @Column(nullable = false)
-    private @NotNull String username;
+    @NotNull
+    private String username;
 
     @Column(nullable = false)
-    private @NotNull String name;
+    @NotNull
+    private String name;
 
     @Column(nullable = false)
-    private @NotNull LocalDate birthDate;
+    @NotNull
+    private LocalDate birthDate;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinTable(
@@ -102,7 +106,7 @@ public class User {
      * @param index: Index or position to remove book in the list
      */
     public void removeBook(@NotNull int index) {
-        if (this.books.size() > index) {
+        if (Objects.nonNull(this.books) && this.books.size() > index) {
             this.books.remove(index);
         }
     }

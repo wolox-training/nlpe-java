@@ -1,6 +1,8 @@
 package com.wolox.training.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -59,6 +61,7 @@ public class Book {
     private String isbn;
 
     @ManyToMany(mappedBy = "books")
+    @JsonIgnore
     private List<User> users;
 
     public Book() {
