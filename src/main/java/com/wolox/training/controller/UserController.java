@@ -2,14 +2,21 @@ package com.wolox.training.controller;
 
 import com.wolox.training.exception.BookAlreadyOwnedException;
 import com.wolox.training.exception.BookNotFoundException;
+import com.wolox.training.exception.ErrorHandler;
 import com.wolox.training.exception.UserIdMismatchException;
 import com.wolox.training.exception.UserNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.models.User;
 import com.wolox.training.repository.BookRepository;
 import com.wolox.training.repository.UserRepository;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,8 +28,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
-@RequestMapping("api/user")
+@RequestMapping(value = "api/user", produces = MediaType.APPLICATION_JSON_VALUE)
+@Api
 public class UserController {
 
     @Autowired
@@ -37,6 +48,10 @@ public class UserController {
      * @return Collection of {@link User}
      */
     @GetMapping
+    @ApiOperation(value = "Return all users", response = User.class, responseContainer = "List")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Successfully retrieves a users list")
+    })
     public Iterable<User> getAll() {
         return userRepository.findAll();
     }
@@ -49,7 +64,12 @@ public class UserController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User user) {
+    @ApiOperation(value = "Create a User", response = User.class)
+    @ApiResponses({
+            @ApiResponse(code = 201, message = "Successfully retrieves then recently created user"),
+            @ApiResponse(code = 400, message = "The Body received not has all required values", response = ErrorHandler.Response.class)
+    })
+    public User create(@ApiParam(value = "User to create", required = true) @RequestBody User user) {
         return userRepository.save(user);
     }
 
@@ -63,7 +83,16 @@ public class UserController {
      * @throws UserNotFoundException: When the user not found with id param passed
      */
     @PutMapping("{id}")
-    public User update(@RequestBody User user, @PathVariable(name = "id") Integer id) throws UserIdMismatchException, UserNotFoundException {
+    @ApiOperation(value = "Giving an Id, update User", response = User.class)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Successfully update user"),
+            @ApiResponse(code = 404, message = "User Not found by id passed", response = ErrorHandler.Response.class),
+            @ApiResponse(code = 400, message = "The Body received not has all required values", response = ErrorHandler.Response.class)
+    })
+    public User update(
+            @ApiParam(value = "User to update", required = true) @RequestBody User user,
+            @ApiParam(value = "Id of the user", required = true) @PathVariable(name = "id") Integer id
+    ) throws UserIdMismatchException, UserNotFoundException {
         if (user.getId() != id) {
             throw new UserIdMismatchException("Id doesn't not match");
         }
@@ -79,7 +108,12 @@ public class UserController {
      * @throws UserNotFoundException: When the user not found with id param passed
      */
     @DeleteMapping("{id}")
-    public void delete(@PathVariable(name = "id") Integer id) throws UserNotFoundException {
+    @ApiOperation(value = "Giving an Id, delete user")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Successfully delete user"),
+            @ApiResponse(code = 404, message = "User Not found by id passed", response = ErrorHandler.Response.class)
+    })
+    public void delete(@ApiParam(value = "Id of the user", required = true) @PathVariable(name = "id") Integer id) throws UserNotFoundException {
 
         userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
         userRepository.deleteById(id);
@@ -96,7 +130,14 @@ public class UserController {
      * @throws BookAlreadyOwnedException: When the book to be added already exists in the user's book list
      */
     @PatchMapping("{user_id}/book/{book_id}/add")
-    public User addBookToUser(@PathVariable(name = "user_id") Integer userId, @PathVariable(name = "book_id") Integer bookId) throws UserNotFoundException, BookNotFoundException, BookAlreadyOwnedException {
+    @ApiOperation(value = "Giving an Id of user and Id of book, add a book to user")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Successfully add book to user"),
+            @ApiResponse(code = 404, message = "User Not found by id passed", response = ErrorHandler.Response.class),
+            @ApiResponse(code = 404, message = "Book Not found by id passed", response = ErrorHandler.Response.class)
+    })
+    public User addBookToUser(@ApiParam(value = "Id of the user", required = true) @PathVariable(name = "user_id") Integer userId,
+                              @ApiParam(value = "Id of the user", required = true) @PathVariable(name = "book_id") Integer bookId) throws UserNotFoundException, BookNotFoundException, BookAlreadyOwnedException {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User Not found"));
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException("Book Not Found"));
 
@@ -115,7 +156,14 @@ public class UserController {
      * @throws BookNotFoundException: When the book not found with id param passed
      */
     @PatchMapping("{user_id}/book/{book_id}/remove")
-    public User removeBookToUser(@PathVariable(name = "user_id") Integer userId, @PathVariable(name = "book_id") Integer bookId) throws UserNotFoundException, BookNotFoundException {
+    @ApiOperation(value = "Giving an Id of user and Id of book, remove a book to user")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Successfully remove book to user"),
+            @ApiResponse(code = 404, message = "User Not found by id passed", response = ErrorHandler.Response.class),
+            @ApiResponse(code = 404, message = "Book Not found by id passed", response = ErrorHandler.Response.class)
+    })
+    public User removeBookToUser(@ApiParam(value = "Id of the user", required = true) @PathVariable(name = "user_id") Integer userId,
+                                 @ApiParam(value = "Id of the user", required = true) @PathVariable(name = "book_id") Integer bookId) throws UserNotFoundException, BookNotFoundException {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User Not found"));
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException("Book Not Found"));
 

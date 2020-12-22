@@ -44,7 +44,7 @@ public class ErrorHandler {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static class Response {
+    public static class Response {
 
         private String message;
         private List<Err> errors;
