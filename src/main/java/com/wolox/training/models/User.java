@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class represent the User entity
@@ -106,7 +107,7 @@ public class User {
      * @param index: Index or position to remove book in the list
      */
     public void removeBook(@NotNull int index) {
-        if (this.books.size() > index) {
+        if (Objects.nonNull(this.books) && this.books.size() > index) {
             this.books.remove(index);
         }
     }
