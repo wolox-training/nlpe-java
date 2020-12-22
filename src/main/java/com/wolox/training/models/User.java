@@ -30,13 +30,16 @@ public class User {
     private int id;
 
     @Column(nullable = false)
-    private @NotNull String username;
+    @NotNull
+    private String username;
 
     @Column(nullable = false)
-    private @NotNull String name;
+    @NotNull
+    private String name;
 
     @Column(nullable = false)
-    private @NotNull LocalDate birthDate;
+    @NotNull
+    private LocalDate birthDate;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -44,7 +47,8 @@ public class User {
             joinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "book_id"}))
-    private @NotEmpty List<Book> books;
+    @NotEmpty
+    private List<Book> books;
 
     public User() {
         this.books = new ArrayList<>();
