@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 public class ErrorHandler {
 
     @ExceptionHandler({
-            BookNotFoundException.class
+            BookNotFoundException.class,
+            UserNotFoundException.class
     })
     public ResponseEntity<Response> handleNotFound(Exception ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response(ex.getMessage()));
@@ -26,8 +27,10 @@ public class ErrorHandler {
 
     @ExceptionHandler({
             BookIdMismatchException.class,
+            UserIdMismatchException.class,
             ConstraintViolationException.class,
-            DataIntegrityViolationException.class
+            DataIntegrityViolationException.class,
+            BookAlreadyOwnedException.class
     })
     public ResponseEntity<Response> handleBadRequest(Exception ex) {
 
