@@ -1,12 +1,16 @@
 package com.wolox.training.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * This class represent the Book Entity
@@ -55,6 +59,10 @@ public class Book {
     @Column(nullable = false)
     @NotNull
     private String isbn;
+
+    @ManyToMany(mappedBy = "books")
+    @JsonIgnore
+    private List<User> users;
 
     public Book() {
     }
@@ -134,4 +142,5 @@ public class Book {
     public void setIsbn(String isbn) {
         this.isbn = isbn;
     }
+
 }
