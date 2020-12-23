@@ -2,6 +2,7 @@ package com.wolox.training.models;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Preconditions;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -84,7 +85,7 @@ public class Book {
     }
 
     public void setAuthor(String author) {
-        this.author = author;
+        this.author = Preconditions.checkNotNull(author, "Author must be not null");
     }
 
     public String getImage() {
@@ -92,7 +93,7 @@ public class Book {
     }
 
     public void setImage(String image) {
-        this.image = image;
+        this.image = Preconditions.checkNotNull(image, "Image must be not null");
     }
 
     public String getTitle() {
@@ -100,7 +101,7 @@ public class Book {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.title = Preconditions.checkNotNull(title, "Title must be not null");
     }
 
     public String getSubTitle() {
@@ -108,7 +109,7 @@ public class Book {
     }
 
     public void setSubTitle(String subTitle) {
-        this.subTitle = subTitle;
+        this.subTitle = Preconditions.checkNotNull(subTitle, "SubTitle must be not null");
     }
 
     public String getPublisher() {
@@ -116,7 +117,7 @@ public class Book {
     }
 
     public void setPublisher(String publisher) {
-        this.publisher = publisher;
+        this.publisher = Preconditions.checkNotNull(publisher, "Publisher must be not null");
     }
 
     public String getYear() {
@@ -124,7 +125,7 @@ public class Book {
     }
 
     public void setYear(String year) {
-        this.year = year;
+        this.year = Preconditions.checkNotNull(year, "Year must be not null");
     }
 
     public int getPages() {
@@ -132,6 +133,7 @@ public class Book {
     }
 
     public void setPages(int pages) {
+        Preconditions.checkArgument(pages > 0, "Pages must be not null");
         this.pages = pages;
     }
 
@@ -140,7 +142,7 @@ public class Book {
     }
 
     public void setIsbn(String isbn) {
-        this.isbn = isbn;
+        this.isbn = Preconditions.checkNotNull(isbn, "Isbn must be not null");
     }
 
 }
