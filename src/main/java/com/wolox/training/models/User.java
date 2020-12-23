@@ -128,4 +128,14 @@ public class User {
         this.books.remove(book);
     }
 
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + id +
+                ",\"username\":\"" + username + "\"" +
+                ",\"name\":\"" + name + "\"" +
+                ",\"birthDate\":\"" + birthDate.toString() + "\"" +
+                ",\"books\":" + books  +
+                "}";
+    }
 }
