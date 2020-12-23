@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -96,6 +97,17 @@ public class UserControllerTest {
                 .content(body))
                 .andExpect(status().isOk())
                 .andExpect(res -> assertEquals(user.toString(), res.getResponse().getContentAsString()));
+    }
+
+    @Test
+    public void givenUserId_whenDeleteUser_thenDeleteSuccess() throws Exception {
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
+        doNothing().when(bookRepository).deleteById(any());
+
+        mvc.perform(delete(PATH + "/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
     private String usersToJsonArrayString(List<User> users) {
