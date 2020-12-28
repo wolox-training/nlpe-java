@@ -1,6 +1,8 @@
 package com.wolox.training.models;
 
 import com.wolox.training.exception.BookAlreadyOwnedException;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -24,6 +26,7 @@ import java.util.Objects;
  * This class represent the User entity
  */
 @Entity(name = "users")
+@ApiModel(description = "Users of application")
 public class User {
 
     @Id
@@ -32,14 +35,17 @@ public class User {
 
     @Column(nullable = false)
     @NotNull
+    @ApiModelProperty(notes = "Username: Is the identifier of the user")
     private String username;
 
     @Column(nullable = false)
     @NotNull
+    @ApiModelProperty(notes = "Name: Is the first name of the user")
     private String name;
 
     @Column(nullable = false)
     @NotNull
+    @ApiModelProperty(notes = "BirthDate: Is the born date of te user")
     private LocalDate birthDate;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
@@ -48,6 +54,7 @@ public class User {
             joinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "book_id"}))
+    @ApiModelProperty(notes = "Books: Is the collection of favorite books of the user")
     private List<Book> books;
 
     public User() {
