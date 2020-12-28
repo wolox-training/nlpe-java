@@ -72,9 +72,9 @@ public class BookControllerTest {
         mvc.perform(post(PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(json.toJson(b)))
+                .content(b.toString()))
                 .andExpect(status().isCreated())
-                .andExpect(res -> Assertions.assertEquals(new Gson().toJson(b), res.getResponse().getContentAsString()));
+                .andExpect(res -> Assertions.assertEquals(b.toString(), res.getResponse().getContentAsString()));
     }
 
     @Test
@@ -85,14 +85,7 @@ public class BookControllerTest {
         mvc.perform(post(PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{" +
-                        "        \"genre\": \"terror\"," +
-                        "        \"subTitle\": \"some subTitle\"," +
-                        "        \"publisher\": \"some publisher\"," +
-                        "        \"year\": \"2020\"," +
-                        "        \"pages\": 14," +
-                        "        \"isbn\": \"ksidsndjs\"" +
-                        "    }"))
+                .content(b.toString()))
                 .andExpect(status().isBadRequest());
     }
 
@@ -107,7 +100,7 @@ public class BookControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isOk())
-                .andExpect(res -> Assertions.assertEquals(new Gson().toJson(b), res.getResponse().getContentAsString()));
+                .andExpect(res -> Assertions.assertEquals(b.toString(), res.getResponse().getContentAsString()));
     }
 
     @Test

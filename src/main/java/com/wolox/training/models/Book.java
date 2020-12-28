@@ -145,4 +145,19 @@ public class Book {
         this.isbn = Preconditions.checkNotNull(isbn, "Isbn must be not null");
     }
 
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + id + "," +
+                "\"genre\":\"" + genre + "\"," +
+                "\"author\":\"" + author + "\"," +
+                "\"image\":\"" + image + "\"," +
+                "\"title\":\"" + title + "\"," +
+                "\"subTitle\":\"" + subTitle + "\"," +
+                "\"publisher\":\"" + publisher + "\"," +
+                "\"year\":\"" + year + "\"," +
+                "\"pages\":" + pages + "," +
+                "\"isbn\":\"" + isbn + "\"" +
+                "}";
+    }
 }
