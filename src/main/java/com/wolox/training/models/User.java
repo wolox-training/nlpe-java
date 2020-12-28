@@ -1,5 +1,6 @@
 package com.wolox.training.models;
 
+import com.google.common.base.Preconditions;
 import com.wolox.training.exception.BookAlreadyOwnedException;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -70,7 +71,7 @@ public class User {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.username = Preconditions.checkNotNull(username, "Username must be not null");
     }
 
     public String getName() {
@@ -78,7 +79,7 @@ public class User {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = Preconditions.checkNotNull(name, "Name must be not null");
     }
 
     public LocalDate getBirthDate() {
@@ -86,7 +87,7 @@ public class User {
     }
 
     public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
+        this.birthDate = Preconditions.checkNotNull(birthDate, "BirthDate must be not null");
     }
 
     public List<Book> getBooks() {
