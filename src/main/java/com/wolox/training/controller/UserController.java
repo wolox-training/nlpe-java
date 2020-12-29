@@ -109,7 +109,6 @@ public class UserController {
 
         User u = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
         user.setPassword(u.getPassword());
-
         return userRepository.save(user);
     }
 
