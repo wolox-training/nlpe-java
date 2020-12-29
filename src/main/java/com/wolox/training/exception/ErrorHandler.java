@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +42,11 @@ public class ErrorHandler {
         }
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(IOException.class)
+    private ResponseEntity<Response> handleServerError(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(ex.getMessage()));
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
