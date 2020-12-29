@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -117,6 +118,15 @@ public class BookController {
     public void delete(@PathVariable(name = "id") int id) throws BookNotFoundException {
         bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException("Book Not found"));
         bookRepository.deleteById(id);
+    }
+
+    @GetMapping("{publisher}/{genre}/{year}")
+    public List<Book> findBooks(
+            @PathVariable(name = "publisher") String publisher,
+            @PathVariable(name = "genre") String genre,
+            @PathVariable(name = "year") String year
+            ) {
+        return bookRepository.findAllByPublisherAndGenreAndYear(publisher, genre, year);
     }
 
 }
