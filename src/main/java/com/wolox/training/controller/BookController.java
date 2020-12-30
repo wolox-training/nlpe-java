@@ -45,12 +45,12 @@ public class BookController {
 
     /**
      * This method find a {@link Book} by isbn code passed as param and follow the next performance:
-     *  - If Book exist in database, retrieves the book
-     *  - If book don't exist in database, search in external api, create and retrieves the book
+     * - If Book exist in database, retrieves the book
+     * - If book don't exist in database, search in external api, create and retrieves the book
      *
      * @param isbn: The code of Book
      * @return The {@link Book} with Isbn passed of param
-     * @throws IOException: When has errors with the external api
+     * @throws IOException:          When has errors with the external api
      * @throws BookNotFoundException : When book not found neither database nor external api
      */
     @GetMapping("{isbn}")
@@ -93,10 +93,10 @@ public class BookController {
      * This method update a {@link Book} if exist with the following params:
      *
      * @param book: Data with structure like a Book to update
-     * @param id: Id of book to update
+     * @param id:   Id of book to update
      * @return Updated {@link Book}
      * @throws BookIdMismatchException: When book id is not equals with id param
-     * @throws BookNotFoundException: When the book not found with id param passed
+     * @throws BookNotFoundException:   When the book not found with id param passed
      */
     @PutMapping("{id}")
     public Book update(@RequestBody Book book, @PathVariable(name = "id") int id) throws BookIdMismatchException, BookNotFoundException {
@@ -120,12 +120,20 @@ public class BookController {
         bookRepository.deleteById(id);
     }
 
+    /**
+     * This method retrieves a List of {@link Book} following the next params.
+     *
+     * @param publisher: The publisher of Book for filter list
+     * @param genre:     The genre of Book for filter list
+     * @param year:      The year of Book for filter list
+     * @return List of {@link Book} filtered with the params passed
+     */
     @GetMapping("{publisher}/{genre}/{year}")
     public List<Book> findBooks(
             @PathVariable(name = "publisher") String publisher,
             @PathVariable(name = "genre") String genre,
             @PathVariable(name = "year") String year
-            ) {
+    ) {
         return bookRepository.findAllByPublisherAndGenreAndYear(publisher, genre, year);
     }
 

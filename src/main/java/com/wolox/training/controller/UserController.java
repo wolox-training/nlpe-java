@@ -104,10 +104,10 @@ public class UserController {
      * This method update a {@link User} if exist with the following params:
      *
      * @param user: Data with structure like a User to update
-     * @param id: Id of user to update
+     * @param id:   Id of user to update
      * @return Updated {@link User}
      * @throws UserIdMismatchException: When user id is not equals with id param
-     * @throws UserNotFoundException: When the user not found with id param passed
+     * @throws UserNotFoundException:   When the user not found with id param passed
      */
     @PutMapping("{id}")
     @ApiOperation(value = "Giving an Id, update User", response = User.class)
@@ -153,8 +153,8 @@ public class UserController {
      * @param userId: Id of the user to add the book
      * @param bookId: Id of book to add of the user
      * @return The {@link User} with the books collection updated with the new {@link Book}
-     * @throws UserNotFoundException: When the user not found with id param passed
-     * @throws BookNotFoundException: When the book not found with id param passed
+     * @throws UserNotFoundException:     When the user not found with id param passed
+     * @throws BookNotFoundException:     When the book not found with id param passed
      * @throws BookAlreadyOwnedException: When the book to be added already exists in the user's book list
      */
     @PatchMapping("{user_id}/book/{book_id}/add")
@@ -199,6 +199,14 @@ public class UserController {
         return userRepository.save(user);
     }
 
+    /**
+     * This method retrieves a List of {@link User} following the next params
+     *
+     * @param begin:    Begin date as first date in the range search
+     * @param end:      end date as last date in the range search
+     * @param sequence: Characters sequence must contain the name of the user
+     * @return List of {@link User} filtered with params passed
+     */
     @GetMapping("{begin}/{end}/{sequence}")
     public List<User> findUsers(
             @PathVariable(name = "begin") String begin,
