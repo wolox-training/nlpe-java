@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -128,11 +129,11 @@ public class BookController {
      * @param year:      The year of Book for filter list
      * @return List of {@link Book} filtered with the params passed
      */
-    @GetMapping("{publisher}/{genre}/{year}")
+    @GetMapping("search")
     public List<Book> findBooks(
-            @PathVariable(name = "publisher") String publisher,
-            @PathVariable(name = "genre") String genre,
-            @PathVariable(name = "year") String year
+            @RequestParam(name = "publisher") String publisher,
+            @RequestParam(name = "genre") String genre,
+            @RequestParam(name = "year") String year
     ) {
         return bookRepository.findAllByPublisherAndGenreAndYear(publisher, genre, year);
     }

@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -207,11 +208,11 @@ public class UserController {
      * @param sequence: Characters sequence must contain the name of the user
      * @return List of {@link User} filtered with params passed
      */
-    @GetMapping("{begin}/{end}/{sequence}")
+    @GetMapping("search")
     public List<User> findUsers(
-            @PathVariable(name = "begin") String begin,
-            @PathVariable(name = "end") String end,
-            @PathVariable(name = "sequence") String sequence
+            @RequestParam(name = "begin") String begin,
+            @RequestParam(name = "end") String end,
+            @RequestParam(name = "sequence") String sequence
     ) {
         return userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(LocalDate.parse(begin), LocalDate.parse(end), sequence);
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -31,7 +32,8 @@ public class ErrorHandler {
             UserIdMismatchException.class,
             ConstraintViolationException.class,
             DataIntegrityViolationException.class,
-            BookAlreadyOwnedException.class
+            BookAlreadyOwnedException.class,
+            MissingServletRequestParameterException.class
     })
     public ResponseEntity<Response> handleBadRequest(Exception ex) {
 
