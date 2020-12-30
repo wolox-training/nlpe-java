@@ -50,8 +50,8 @@ public class BookController {
      *
      * @param isbn: The code of Book
      * @return The {@link Book} with Isbn passed of param
-     * @throws IOException:          When has errors with the external api
-     * @throws BookNotFoundException : When book not found neither database nor external api
+     * @throws IOException:           When has errors with the external api
+     * @throws BookNotFoundException: When book not found neither database nor external api
      */
     @GetMapping("{isbn}")
     public ResponseEntity<BookDTO> findBookByIsbn(@PathVariable(name = "isbn") String isbn) throws IOException, BookNotFoundException {
