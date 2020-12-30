@@ -5,6 +5,7 @@ import com.wolox.training.models.Book;
 import com.wolox.training.models.User;
 import com.wolox.training.repository.BookRepository;
 import com.wolox.training.repository.UserRepository;
+import com.wolox.training.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -13,11 +14,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +50,12 @@ public class UserControllerTest {
 
     @MockBean
     private BookRepository bookRepository;
+
+    @MockBean
+    private AuthService authService;
+
+    @MockBean
+    private PasswordEncoder passwordEncoder;
 
     private final String PATH = "/api/user";
     private final String SPRING_USER = "nlpe";
@@ -80,6 +90,11 @@ public class UserControllerTest {
         book.setYear("2020");
         book.setIsbn("000111223366");
         book.setAuthor("author");
+
+        String SPRING_PASSWORD = "123456";
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder().username(SPRING_USER).password(SPRING_PASSWORD).authorities(new ArrayList<>()).build();
+        given(authService.loadUserByUsername(SPRING_USER)).willReturn(userDetails);
+        given(passwordEncoder.matches(SPRING_PASSWORD, SPRING_PASSWORD)).willReturn(true);
     }
 
     @WithMockUser(value = SPRING_USER)
@@ -98,6 +113,7 @@ public class UserControllerTest {
     @Test
     public void givenUser_whenCreateUser_thenReturnUser() throws Exception {
         given(userRepository.save(any())).willReturn(user);
+        given(passwordEncoder.encode(user.getPassword())).willReturn(user.getPassword());
 
         mvc.perform(post(PATH)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -110,6 +126,7 @@ public class UserControllerTest {
     @Test
     public void givenUser_whenCreateUser_thenReturnBodyException() throws Exception {
         given(userRepository.save(any())).willThrow(DataIntegrityViolationException.class);
+        given(passwordEncoder.encode(user.getPassword())).willReturn(user.getPassword());
 
         mvc.perform(post(PATH)
                 .contentType(MediaType.APPLICATION_JSON)

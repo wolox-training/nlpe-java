@@ -1,11 +1,14 @@
 package com.wolox.training.controller;
 
+import com.wolox.training.dto.BookDTO;
 import com.wolox.training.exception.BookIdMismatchException;
 import com.wolox.training.exception.BookNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.repository.BookRepository;
+import com.wolox.training.service.OpenLibraryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +19,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.util.Optional;
+
 @RestController
 @RequestMapping(value = "api/book")
 public class BookController {
 
     @Autowired
     private BookRepository bookRepository;
+
+    @Autowired
+    private OpenLibraryService openLibraryService;
 
     /**
      * This method return a collection of {@link Book}
@@ -31,6 +40,40 @@ public class BookController {
     @GetMapping
     public Iterable<Book> findAll() {
         return bookRepository.findAll();
+    }
+
+    /**
+     * This method find a {@link Book} by isbn code passed as param and follow the next performance:
+     *  - If Book exist in database, retrieves the book
+     *  - If book don't exist in database, search in external api, create and retrieves the book
+     *
+     * @param isbn: The code of Book
+     * @return The {@link Book} with Isbn passed of param
+     * @throws IOException: When has errors with the external api
+     * @throws BookNotFoundException : When book not found neither database nor external api
+     */
+    @GetMapping("{isbn}")
+    public ResponseEntity<BookDTO> findBookByIsbn(@PathVariable(name = "isbn") String isbn) throws IOException, BookNotFoundException {
+        Optional<Book> optionalBook = bookRepository.findByIsbn(isbn);
+        if (optionalBook.isPresent()) {
+            return ResponseEntity.ok(new BookDTO(optionalBook.get()));
+        }
+
+        BookDTO dto = openLibraryService.bookInfo(isbn);
+
+        Book book = new Book();
+        book.setIsbn(dto.getIsbn());
+        book.setYear(dto.getPublishDate());
+        book.setTitle(dto.getTitle());
+        book.setSubTitle(dto.getSubtitle());
+        book.setAuthor(dto.getAuthors().get(0));
+        book.setPublisher(dto.getPublishers().get(0));
+        book.setPages(dto.getNumberOfPages());
+        book.setImage(dto.getImageUrl());
+
+        bookRepository.save(book);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     /**
