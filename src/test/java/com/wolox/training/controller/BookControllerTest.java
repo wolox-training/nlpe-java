@@ -1,9 +1,14 @@
 package com.wolox.training.controller;
 
 import com.google.gson.Gson;
+import com.wolox.training.dto.BookDTO;
+import com.wolox.training.exception.BookNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.repository.BookRepository;
+import com.wolox.training.service.AuthService;
+import com.wolox.training.service.OpenLibraryService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +16,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,9 +50,18 @@ public class BookControllerTest {
     @MockBean
     private BookRepository bookRepository;
 
+    @MockBean
+    private OpenLibraryService openLibraryService;
+
+    @MockBean
+    private AuthService authService;
+
+    @MockBean
+    private PasswordEncoder passwordEncoder;
+
     private final Gson json = new Gson();
     private final String PATH = "/api/book";
-    private final String SPRING_USER = "nlpe";
+    private final String SPRING_USER = "spring";
     private final int id = 1;
     private final String body = "{" +
             "\"id\":" + id + "," +
@@ -58,6 +76,14 @@ public class BookControllerTest {
             "\"isbn\":\"001122331\"" +
             "}";
 
+    @BeforeEach
+    public void init() {
+        String SPRING_PASSWORD = "123456";
+        UserDetails userDetails = User.builder().username(SPRING_USER).password(SPRING_PASSWORD).authorities(new ArrayList<>()).build();
+        given(authService.loadUserByUsername(SPRING_USER)).willReturn(userDetails);
+        given(passwordEncoder.matches(SPRING_PASSWORD, SPRING_PASSWORD)).willReturn(true);
+    }
+
     @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBooks_whenGetAll_thenReturnArray() throws Exception {
@@ -68,6 +94,45 @@ public class BookControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(res -> assertEquals(json.toJson(books), res.getResponse().getContentAsString()));
+    }
+
+    @WithMockUser(value = SPRING_USER)
+    @Test
+    public void givenIsbn_whenGetBookByIsbn_thenReturnBook() throws Exception {
+        Book b = this.mockBooks().get(0);
+        given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.of(b));
+
+        mvc.perform(get(PATH + "/" + b.getIsbn())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(res -> assertEquals(new BookDTO(b).toString(), res.getResponse().getContentAsString()));
+    }
+
+    @WithMockUser(value = SPRING_USER)
+    @Test
+    public void givenIsbn_whenGetBookByIsbn_thenCreateAndReturnBook() throws Exception {
+        Book b = this.mockBooks().get(0);
+        BookDTO dto = new BookDTO(b);
+        given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.empty());
+        given(openLibraryService.bookInfo(b.getIsbn())).willReturn(dto);
+        given(bookRepository.save(b)).willReturn(b);
+
+        mvc.perform(get(PATH + "/" + b.getIsbn())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(res -> assertEquals(dto.toString(), res.getResponse().getContentAsString()));
+    }
+
+    @WithMockUser(value = SPRING_USER)
+    @Test
+    public void givenIsbn_whenGetBookByIsbn_thenReturnBookNotFound() throws Exception {
+        Book b = this.mockBooks().get(0);
+        given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.empty());
+        given(openLibraryService.bookInfo(b.getIsbn())).willThrow(BookNotFoundException.class);
+
+        mvc.perform(get(PATH + "/" + b.getIsbn())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
     @Test

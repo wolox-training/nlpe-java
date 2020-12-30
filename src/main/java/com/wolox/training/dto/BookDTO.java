@@ -42,6 +42,7 @@ public class BookDTO {
         this.publishDate = book.getYear();
         this.numberOfPages = book.getPages();
         this.authors = Collections.singletonList(book.getAuthor());
+        this.imageUrl = book.getImage();
     }
 
     public String getIsbn() {
@@ -81,5 +82,18 @@ public class BookDTO {
                 .stream(array.spliterator(), false)
                 .map(o -> new JSONObject(o.toString()).getString(key))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"isbn\":\"" + isbn + "\"," +
+                "\"title\":\"" + title + "\"," +
+                "\"subtitle\":\"" + subtitle + "\"," +
+                "\"publishers\":[" + publishers.stream().map(p -> "\"" + p + "\"").collect(Collectors.joining()) + "]," +
+                "\"publishDate\":\"" + publishDate + "\"," +
+                "\"numberOfPages\":" + numberOfPages + "," +
+                "\"authors\":[" + authors.stream().map(a -> "\"" + a + "\"").collect(Collectors.joining()) + "]" +
+                "}";
     }
 }
