@@ -210,9 +210,9 @@ public class UserController {
      */
     @GetMapping("search")
     public List<User> findUsers(
-            @RequestParam(name = "begin") String begin,
-            @RequestParam(name = "end") String end,
-            @RequestParam(name = "sequence") String sequence
+            @RequestParam(name = "begin", required = false) String begin,
+            @RequestParam(name = "end", required = false) String end,
+            @RequestParam(name = "sequence", required = false) String sequence
     ) {
         return userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(LocalDate.parse(begin), LocalDate.parse(end), sequence);
     }
