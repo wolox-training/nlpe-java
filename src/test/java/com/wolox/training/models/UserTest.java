@@ -33,6 +33,7 @@ public class UserTest {
         user.setUsername("username");
         user.setBirthDate(LocalDate.now());
         user.setName("nestor");
+        user.setPassword("123456");
     }
 
     @Test
@@ -59,6 +60,11 @@ public class UserTest {
     @Test
     public void givenUserWithNameNull_whenCreateEntity_thenConstraintError() {
         Assertions.assertThrows(NullPointerException.class, () -> user.setName(null));
+    }
+
+    @Test
+    public void givenUserWithPasswordNull_whenCreateEntity_thenConstraintError() {
+        Assertions.assertThrows(NullPointerException.class, () -> user.setPassword(null));
     }
 
 }

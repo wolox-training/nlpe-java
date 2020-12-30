@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -47,6 +48,7 @@ public class UserControllerTest {
     private BookRepository bookRepository;
 
     private final String PATH = "/api/user";
+    private final String SPRING_USER = "nlpe";
     private User user;
     private Book book;
     private final int id = 1;
@@ -55,6 +57,7 @@ public class UserControllerTest {
             "        \"id\": " + id + "," +
             "        \"username\": \"nlperez\"," +
             "        \"name\": \"nestor\"," +
+            "        \"password\": \"123456\"," +
             "        \"birthDate\": \"1193-06-11\"," +
             "        \"books\": []" +
             "    }";
@@ -65,6 +68,7 @@ public class UserControllerTest {
         user.setName("name1");
         user.setUsername("username1");
         user.setBirthDate(LocalDate.now());
+        user.setPassword("123456");
 
         book = new Book();
         book.setImage("http://image.com");
@@ -78,6 +82,7 @@ public class UserControllerTest {
         book.setAuthor("author");
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUsers_whenGetAll_thenReturnUserArray() throws Exception {
 
@@ -113,6 +118,7 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserAndId_whenUpdateUser_thenReturnUser() throws Exception {
 
@@ -127,6 +133,7 @@ public class UserControllerTest {
                 .andExpect(res -> assertEquals(user.toString(), res.getResponse().getContentAsString()));
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserAndId_whenUpdateUser_thenReturnIdMissMatch() throws Exception {
 
@@ -137,6 +144,7 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserAndId_whenUpdateUser_thenReturnUNotFound() throws Exception {
 
@@ -149,6 +157,7 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserId_whenDeleteUser_thenDeleteSuccess() throws Exception {
         given(userRepository.findById(id)).willReturn(Optional.of(user));
@@ -160,6 +169,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserId_whenDeleteUser_thenReturnUserNotFound() throws Exception {
         given(userRepository.findById(id)).willReturn(Optional.empty());
@@ -170,6 +180,7 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserIdAndBookId_whenAddBookToUser_thenReturnUserWithBook() throws Exception {
         given(userRepository.findById(id)).willReturn(Optional.of(user));
@@ -183,6 +194,7 @@ public class UserControllerTest {
                 .andExpect(res -> assertEquals(user.toString(), res.getResponse().getContentAsString()));
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserIdAndBookId_whenAddBookToUser_thenReturnBookAlreadyOwned() throws Exception {
         given(userRepository.findById(id)).willReturn(Optional.of(user));
@@ -196,6 +208,7 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserIdAndBookId_whenAddBookToUser_thenReturnUserNotFound() throws Exception {
         given(userRepository.findById(id)).willReturn(Optional.empty());
@@ -206,6 +219,7 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserIdAndBookId_whenAddBookToUser_thenReturnBookNotFound() throws Exception {
         given(userRepository.findById(id)).willReturn(Optional.of(user));
@@ -217,6 +231,7 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserIdAndBookId_whenRemoveBookToUser_thenReturnUserWithoutBook() throws Exception {
         user.addBook(book);
@@ -231,6 +246,7 @@ public class UserControllerTest {
                 .andExpect(res -> assertEquals(user.toString(), res.getResponse().getContentAsString()));
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserIdAndBookId_whenRemoveBookToUser_thenReturnUserNotFound() throws Exception {
         given(userRepository.findById(id)).willReturn(Optional.of(user));
@@ -242,6 +258,7 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenUserIdAndBookId_whenRemoveBookToUser_thenReturnBookNotFound() throws Exception {
         given(userRepository.findById(id)).willReturn(Optional.empty());

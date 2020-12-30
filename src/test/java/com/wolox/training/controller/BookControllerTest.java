@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -42,6 +43,7 @@ public class BookControllerTest {
 
     private final Gson json = new Gson();
     private final String PATH = "/api/book";
+    private final String SPRING_USER = "nlpe";
     private final int id = 1;
     private final String body = "{" +
             "\"id\":" + id + "," +
@@ -56,6 +58,7 @@ public class BookControllerTest {
             "\"isbn\":\"001122331\"" +
             "}";
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBooks_whenGetAll_thenReturnArray() throws Exception {
         List<Book> books = this.mockBooks();
@@ -92,6 +95,7 @@ public class BookControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBookAndId_whenUpdateBook_thenReturnBook() throws Exception {
         Book b = this.mockBooks().get(0);
@@ -106,6 +110,7 @@ public class BookControllerTest {
                 .andExpect(res -> Assertions.assertEquals(b.toString(), res.getResponse().getContentAsString()));
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBookAndId_whenUpdateBook_thenReturnIdMissMatch() throws Exception {
 
@@ -116,6 +121,7 @@ public class BookControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBookAndId_whenUpdateBook_thenReturnBookNotFound() throws Exception {
         given(bookRepository.findById(id)).willReturn(Optional.empty());
@@ -127,6 +133,7 @@ public class BookControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBookId_whenDeleteBook_thenSuccess() throws Exception {
 
@@ -140,6 +147,7 @@ public class BookControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBookId_whenDeleteBook_thenReturnBookNotFound() throws Exception {
 

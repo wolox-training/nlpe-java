@@ -15,6 +15,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
@@ -24,6 +25,7 @@ dependencies {
 	compile 'org.springframework.plugin:spring-plugin-core:1.2.0.RELEASE'
 	testCompile group: 'junit', name: 'junit', version: '4.13.1'
 	testCompile group: 'com.h2database', name: 'h2', version: '1.3.164'
+	testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.4.2'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

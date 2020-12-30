@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * This class represent the User entity
@@ -49,6 +48,11 @@ public class User {
     @NotNull
     @ApiModelProperty(notes = "BirthDate: Is the born date of te user")
     private LocalDate birthDate;
+
+    @Column(nullable = false)
+    @NotNull
+    @ApiModelProperty(notes = "Password: Is the password for authenticate user")
+    private String password;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinTable(
@@ -89,6 +93,14 @@ public class User {
 
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = Preconditions.checkNotNull(birthDate, "BirthDate must be not null");
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = Preconditions.checkNotNull(password, "Password must be not null");
     }
 
     public List<Book> getBooks() {
@@ -136,7 +148,8 @@ public class User {
                 ",\"username\":\"" + username + "\"" +
                 ",\"name\":\"" + name + "\"" +
                 ",\"birthDate\":\"" + birthDate.toString() + "\"" +
-                ",\"books\":" + books  +
+                ",\"password\":\"" + password + "\"" +
+                ",\"books\":" + books +
                 "}";
     }
 }

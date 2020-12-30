@@ -15,8 +15,10 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 
 @RestController
@@ -39,6 +43,9 @@ public class UserController {
 
     @Autowired
     private BookRepository bookRepository;
+
+    @Autowired
+    private PasswordEncoder encoder;
 
     /**
      * This method return a collection of {@link User}
@@ -68,6 +75,11 @@ public class UserController {
             @ApiResponse(code = 400, message = "The Body received not has all required values", response = ErrorHandler.Response.class)
     })
     public User create(@ApiParam(value = "User to create", required = true) @RequestBody User user) {
+        if (Objects.isNull(user.getPassword())) {
+            throw new DataIntegrityViolationException("Password must be not null");
+        }
+
+        user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -95,7 +107,8 @@ public class UserController {
             throw new UserIdMismatchException("Id doesn't not match");
         }
 
-        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
+        User u = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
+        user.setPassword(u.getPassword());
         return userRepository.save(user);
     }
 
