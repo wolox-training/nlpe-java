@@ -212,9 +212,12 @@ public class UserController {
     public List<User> findUsers(
             @RequestParam(name = "begin", required = false) String begin,
             @RequestParam(name = "end", required = false) String end,
-            @RequestParam(name = "sequence", required = false) String sequence
+            @RequestParam(name = "sequence", required = false, defaultValue = "") String sequence
     ) {
-        return userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(LocalDate.parse(begin), LocalDate.parse(end), sequence);
+        return userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(
+                Objects.nonNull(begin) ? LocalDate.parse(begin) : null,
+                Objects.nonNull(end) ? LocalDate.parse(end) : null,
+                sequence);
     }
 
 }
