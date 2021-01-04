@@ -68,6 +68,18 @@ public class Book {
     public Book() {
     }
 
+    public Book(String genre, @NotNull String author, @NotNull String image, @NotNull String title, @NotNull String subTitle, @NotNull String publisher, @NotNull String year, @NotNull int pages, @NotNull String isbn) {
+        this.genre = genre;
+        this.author = author;
+        this.image = image;
+        this.title = title;
+        this.subTitle = subTitle;
+        this.publisher = publisher;
+        this.year = year;
+        this.pages = pages;
+        this.isbn = isbn;
+    }
+
     public int getId() {
         return id;
     }

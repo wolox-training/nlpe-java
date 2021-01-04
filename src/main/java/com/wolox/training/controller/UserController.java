@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +28,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -62,6 +67,19 @@ public class UserController {
     }
 
     /**
+     * This method return current {@link User} authenticated
+     *
+     * @return The data of {@link User} authenticated
+     */
+    @GetMapping("session")
+    @ResponseBody
+    public User getAuthenticatedUser(Authentication authentication) {
+        User u = new User();
+        u.setUsername(authentication.getName());
+        return u;
+    }
+
+    /**
      * This method creates a {@link User} with the following param:
      *
      * @param user: Data with structure like a User to create
@@ -87,10 +105,10 @@ public class UserController {
      * This method update a {@link User} if exist with the following params:
      *
      * @param user: Data with structure like a User to update
-     * @param id: Id of user to update
+     * @param id:   Id of user to update
      * @return Updated {@link User}
      * @throws UserIdMismatchException: When user id is not equals with id param
-     * @throws UserNotFoundException: When the user not found with id param passed
+     * @throws UserNotFoundException:   When the user not found with id param passed
      */
     @PutMapping("{id}")
     @ApiOperation(value = "Giving an Id, update User", response = User.class)
@@ -136,8 +154,8 @@ public class UserController {
      * @param userId: Id of the user to add the book
      * @param bookId: Id of book to add of the user
      * @return The {@link User} with the books collection updated with the new {@link Book}
-     * @throws UserNotFoundException: When the user not found with id param passed
-     * @throws BookNotFoundException: When the book not found with id param passed
+     * @throws UserNotFoundException:     When the user not found with id param passed
+     * @throws BookNotFoundException:     When the book not found with id param passed
      * @throws BookAlreadyOwnedException: When the book to be added already exists in the user's book list
      */
     @PatchMapping("{user_id}/book/{book_id}/add")
@@ -180,6 +198,23 @@ public class UserController {
 
         user.removeBook(book);
         return userRepository.save(user);
+    }
+
+    /**
+     * This method retrieves a List of {@link User} following the next params
+     *
+     * @param begin:    Begin date as first date in the range search
+     * @param end:      end date as last date in the range search
+     * @param sequence: Characters sequence must contain the name of the user
+     * @return List of {@link User} filtered with params passed
+     */
+    @GetMapping("search")
+    public List<User> findUsers(
+            @RequestParam(name = "begin") String begin,
+            @RequestParam(name = "end") String end,
+            @RequestParam(name = "sequence") String sequence
+    ) {
+        return userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(LocalDate.parse(begin), LocalDate.parse(end), sequence);
     }
 
 }

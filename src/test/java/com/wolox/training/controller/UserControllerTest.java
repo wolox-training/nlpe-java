@@ -6,6 +6,7 @@ import com.wolox.training.models.User;
 import com.wolox.training.repository.BookRepository;
 import com.wolox.training.repository.UserRepository;
 import com.wolox.training.service.AuthService;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -31,11 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -108,6 +105,23 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(res -> assertEquals(usersToJsonArrayString(users), res.getResponse().getContentAsString()));
+    }
+
+    @WithMockUser(value = SPRING_USER)
+    @Test
+    public void givenUser_whenGetAuthenticatedUser_theReturnUser() throws Exception {
+
+        User authenticatedUser = new User();
+        authenticatedUser.setUsername(SPRING_USER);
+
+        mvc.perform(get(PATH + "/session")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(res -> assertEquals(
+                        authenticatedUser.getUsername(),
+                        new JSONObject(res.getResponse().getContentAsString()).getString("username")
+                ));
+
     }
 
     @Test
