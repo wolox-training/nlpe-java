@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -35,13 +36,46 @@ public class BookController {
     private OpenLibraryService openLibraryService;
 
     /**
-     * This method return a collection of {@link Book}
+     * This method return a list of {@link Book} following the next Optional params:
      *
-     * @return Collection of {@link Book}
+     * @param id
+     * @param author
+     * @param genre
+     * @param image
+     * @param isbn
+     * @param pages
+     * @param publisher
+     * @param subtitle
+     * @param title
+     * @param year
+     *
+     * @return The List of {@link Book} filtered with Optional parameters passed
      */
     @GetMapping
-    public Iterable<Book> findAll() {
-        return bookRepository.findAll();
+    public Iterable<Book> findAll(
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String image,
+            @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) Integer pages,
+            @RequestParam(required = false) String publisher,
+            @RequestParam(required = false) String subtitle,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String year
+    ) {
+        return bookRepository.findAll(
+                id,
+                author,
+                genre,
+                image,
+                isbn,
+                (Objects.nonNull(pages) && pages > 0) ? pages : 0,
+                publisher,
+                subtitle,
+                title,
+                year
+        );
     }
 
     /**
