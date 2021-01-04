@@ -143,8 +143,4 @@ public class UserTest {
         Assertions.assertThrows(NullPointerException.class, () -> user.setPassword(null));
     }
 
-    private void fillData() {
-
-    }
-
 }
