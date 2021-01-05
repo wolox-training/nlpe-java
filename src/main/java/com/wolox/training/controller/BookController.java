@@ -38,16 +38,16 @@ public class BookController {
     /**
      * This method return a list of {@link Book} following the next Optional params:
      *
-     * @param id
-     * @param author
-     * @param genre
-     * @param image
-     * @param isbn
-     * @param pages
-     * @param publisher
-     * @param subtitle
-     * @param title
-     * @param year
+     * @param id: The id of Book
+     * @param author: The author of Book
+     * @param genre: The Genre of Book
+     * @param image: The image or cover of Book
+     * @param isbn: The code of Book
+     * @param pages: The number of pages total of Book
+     * @param publisher: The entity of published of Book
+     * @param subtitle: The Subtitle of Book
+     * @param title: The title of Book
+     * @param year: The year of publish of Book
      *
      * @return The List of {@link Book} filtered with Optional parameters passed
      */
