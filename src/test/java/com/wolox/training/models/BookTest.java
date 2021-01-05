@@ -79,9 +79,10 @@ public class BookTest {
         Book book1 = new Book(commonGenre, "author1", "image1", "title1", "subtitle1", commonPublisher, commonYear, 100, "001");
         Book book2 = new Book(commonGenre, "author2", "image2", "title2", "subtitle2", "publish2", "2020", 200, "002");
         Book book3 = new Book(commonGenre, "author3", "image3", "title3", "subtitle3", commonPublisher, commonYear, 300, "003");
-        Book book4 = new Book(commonGenre, "author4", "image4", "title4", "subtitle4", commonPublisher, "2012", 400, "004");
+        Book book4 = new Book("Genre4", "author4", "image4", "title4", "subtitle4", commonPublisher, commonYear, 400, "004");
         Book book5 = new Book(commonGenre, "author5", "image5", "title5", "subtitle5", commonPublisher, commonYear, 500, "005");
-        Book book6 = new Book(commonGenre, "author6", "image6", "title6", "subtitle6", "publish6", "2015", 600, "006");
+        Book book6 = new Book(commonGenre, "author6", "image6", "title6", "subtitle6", "publish6", commonYear, 600, "006");
+        Book book7 = new Book(commonGenre, "author6", "image6", "title6", "subtitle6", commonPublisher, "2013", 600, "006");
 
         entityManager.persist(book1);
         entityManager.persist(book2);
@@ -89,10 +90,23 @@ public class BookTest {
         entityManager.persist(book4);
         entityManager.persist(book5);
         entityManager.persist(book6);
+        entityManager.persist(book7);
         entityManager.flush();
 
         List<Book> expectedList = Arrays.asList(book1, book3, book5);
         assertThat(bookRepository.findAllByPublisherAndGenreAndYear(commonPublisher, commonGenre, commonYear)).isEqualTo(expectedList);
+
+        List<Book> withoutPublisher = Arrays.asList(book1, book3, book5, book6);
+        assertThat(bookRepository.findAllByPublisherAndGenreAndYear(null, commonGenre, commonYear)).isEqualTo(withoutPublisher);
+
+        List<Book> withoutGenre = Arrays.asList(book1, book3, book4, book5);
+        assertThat(bookRepository.findAllByPublisherAndGenreAndYear(commonPublisher, null, commonYear)).isEqualTo(withoutGenre);
+
+        List<Book> withoutYear = Arrays.asList(book1, book3, book5, book7);
+        assertThat(bookRepository.findAllByPublisherAndGenreAndYear(commonPublisher, commonGenre, null)).isEqualTo(withoutYear);
+
+        List<Book> all = Arrays.asList(book1, book2, book3, book4, book5, book6, book7);
+        assertThat(bookRepository.findAllByPublisherAndGenreAndYear(null, null, null)).isEqualTo(all);
     }
 
 
