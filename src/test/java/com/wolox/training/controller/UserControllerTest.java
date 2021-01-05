@@ -14,6 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,16 +27,16 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -98,13 +102,15 @@ public class UserControllerTest {
     @Test
     public void givenUsers_whenGetAll_thenReturnUserArray() throws Exception {
 
-        List<User> users = Arrays.asList(user);
-        given(userRepository.findAll()).willReturn(users);
+        List<User> users = Collections.singletonList(user);
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("id"));
+        Page<User> page = new PageImpl<>(users, pageRequest, 10);
+        given(userRepository.findAll(pageRequest)).willReturn(page);
 
         mvc.perform(get(PATH)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(res -> assertEquals(usersToJsonArrayString(users), res.getResponse().getContentAsString()));
+                .andExpect(res -> jsonPath("$['pageable']['paged']").value("true"));
     }
 
     @WithMockUser(value = SPRING_USER)
@@ -300,9 +306,5 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-
-    private String usersToJsonArrayString(List<User> users) {
-        return "[" + users.stream().map(User::toString).collect(Collectors.joining()) + "]";
-    }
 
 }

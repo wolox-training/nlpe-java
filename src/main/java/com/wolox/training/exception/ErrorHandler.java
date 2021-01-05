@@ -1,6 +1,7 @@
 package com.wolox.training.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.QueryException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,8 @@ public class ErrorHandler {
             ConstraintViolationException.class,
             DataIntegrityViolationException.class,
             BookAlreadyOwnedException.class,
-            MissingServletRequestParameterException.class
+            MissingServletRequestParameterException.class,
+            QueryException.class
     })
     public ResponseEntity<Response> handleBadRequest(Exception ex) {
 

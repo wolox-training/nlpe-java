@@ -1,6 +1,5 @@
 package com.wolox.training.controller;
 
-import com.google.gson.Gson;
 import com.wolox.training.dto.BookDTO;
 import com.wolox.training.exception.BookNotFoundException;
 import com.wolox.training.models.Book;
@@ -15,6 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,10 +36,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -59,7 +60,6 @@ public class BookControllerTest {
     @MockBean
     private PasswordEncoder passwordEncoder;
 
-    private final Gson json = new Gson();
     private final String PATH = "/api/book";
     private final String SPRING_USER = "spring";
     private final int id = 1;
@@ -88,12 +88,14 @@ public class BookControllerTest {
     @Test
     public void givenBooks_whenGetAll_thenReturnArray() throws Exception {
         List<Book> books = this.mockBooks();
-        given(bookRepository.findAll()).willReturn(books);
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("id"));
+        Page<Book> page = new PageImpl<>(books, pageRequest, 10);
+        given(bookRepository.findAll(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).willReturn(page);
 
         mvc.perform(get(PATH)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(res -> assertEquals(json.toJson(books), res.getResponse().getContentAsString()));
+                .andExpect(jsonPath("$['pageable']['paged']").value("true"));
     }
 
     @WithMockUser(value = SPRING_USER)

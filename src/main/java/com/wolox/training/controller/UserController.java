@@ -16,6 +16,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -34,7 +37,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 
 
@@ -55,6 +57,9 @@ public class UserController {
     /**
      * This method return a collection of {@link User}
      *
+     * @param from: Page from retrieves results
+     * @param size: Size list of expected result
+     * @param sort: Field by sort
      * @return Collection of {@link User}
      */
     @GetMapping
@@ -62,8 +67,12 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "Successfully retrieves a users list")
     })
-    public Iterable<User> getAll() {
-        return userRepository.findAll();
+    public Page<User> getAll(
+            @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @RequestParam(name = "size", defaultValue = "5") Integer size,
+            @RequestParam(name = "sort", defaultValue = "id") String sort
+    ) {
+        return userRepository.findAll(PageRequest.of(from, size, Sort.by(sort)));
     }
 
     /**
@@ -206,18 +215,24 @@ public class UserController {
      * @param begin:    Begin date as first date in the range search
      * @param end:      end date as last date in the range search
      * @param sequence: Characters sequence must contain the name of the user
+     * @param from:     Page from retrieves results
+     * @param size:     Size list of expected result
+     * @param sort:     Field by sort
      * @return List of {@link User} filtered with params passed
      */
     @GetMapping("search")
-    public List<User> findUsers(
+    public Page<User> findUsers(
             @RequestParam(name = "begin", required = false) String begin,
             @RequestParam(name = "end", required = false) String end,
-            @RequestParam(name = "sequence", required = false, defaultValue = "") String sequence
+            @RequestParam(name = "sequence", required = false, defaultValue = "") String sequence,
+            @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @RequestParam(name = "size", defaultValue = "5") Integer size,
+            @RequestParam(name = "sort", defaultValue = "id") String sort
     ) {
         return userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(
                 Objects.nonNull(begin) ? LocalDate.parse(begin) : null,
                 Objects.nonNull(end) ? LocalDate.parse(end) : null,
-                sequence);
+                sequence, PageRequest.of(from, size, Sort.by(sort)));
     }
 
 }
