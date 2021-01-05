@@ -1,6 +1,9 @@
 package com.wolox.training.repository;
 
 import com.wolox.training.models.Book;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,7 +26,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
             "and (:subtitle is null or b.subTitle = :subtitle) " +
             "and (:title is null or b.title = :title) " +
             "and (:year is null or b.year = :year)")
-    List<Book> findAll(
+    Page<Book> findAll(
             @Param("id") Integer id,
             @Param("author") String author,
             @Param("genre") String genre,
@@ -33,7 +36,8 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
             @Param("publisher") String publisher,
             @Param("subtitle") String subtitle,
             @Param("title") String title,
-            @Param("year") String year
+            @Param("year") String year,
+            Pageable page
             );
 
     Optional<Book> findTopByAuthor(String author);
@@ -43,9 +47,10 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     @Query("select b from Book b where (:publisher is null or b.publisher = :publisher) " +
             "and (:year is null or b.year = :year ) " +
             "and (:genre is null or b.genre = :genre)")
-    List<Book> findAllByPublisherAndGenreAndYear(
+    Page<Book> findAllByPublisherAndGenreAndYear(
             @Param("publisher") String publisher,
             @Param("genre" ) String genre,
-            @Param("year" ) String year
+            @Param("year" ) String year,
+            Pageable page
     );
 }

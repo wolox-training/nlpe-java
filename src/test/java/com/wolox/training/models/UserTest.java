@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
@@ -57,6 +58,7 @@ public class UserTest {
 
     @Test
     public void givenDateRangeAndCharSequence_whenSearch_thenReturnFilteredList() {
+        PageRequest page = PageRequest.of(0, 10);
         LocalDate begin = LocalDate.of(1963, 1, 1);
         LocalDate end = LocalDate.of(1992, 12, 31);
         String charSequence = "pEr";
@@ -108,19 +110,19 @@ public class UserTest {
         entityManager.flush();
 
         List<User> expectedList = Arrays.asList(isabel, cristian);
-        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(begin, end, charSequence)).isEqualTo(expectedList);
+        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(begin, end, charSequence, page).getContent()).isEqualTo(expectedList);
 
         List<User> withoutBegin = Arrays.asList(hidalgo, isabel, cristian);
-        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(null, end, charSequence)).isEqualTo(withoutBegin);
+        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(null, end, charSequence, page).getContent()).isEqualTo(withoutBegin);
 
         List<User> withoutEnd = Arrays.asList(nestor, isabel, cristian);
-        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(begin, null, charSequence)).isEqualTo(withoutEnd);
+        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(begin, null, charSequence, page).getContent()).isEqualTo(withoutEnd);
 
         List<User> withoutSequence = Arrays.asList(isabel, isbeth, zaida, cristian);
-        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(begin, end, "")).isEqualTo(withoutSequence);
+        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(begin, end, "", page).getContent()).isEqualTo(withoutSequence);
 
         List<User> all = Arrays.asList(nestor, hidalgo, isabel, isbeth, zaida, cristian);
-        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(null, null, "")).isEqualTo(all);
+        assertThat(userRepository.findAllByBirthDateBetweenAndNameIsContainingIgnoreCase(null, null, "", page).getContent()).isEqualTo(all);
     }
 
     @Test

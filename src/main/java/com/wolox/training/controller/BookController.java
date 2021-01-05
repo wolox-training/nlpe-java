@@ -7,6 +7,9 @@ import com.wolox.training.models.Book;
 import com.wolox.training.repository.BookRepository;
 import com.wolox.training.service.OpenLibraryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -52,7 +54,7 @@ public class BookController {
      * @return The List of {@link Book} filtered with Optional parameters passed
      */
     @GetMapping
-    public Iterable<Book> findAll(
+    public Page<Book> findAll(
             @RequestParam(required = false) Integer id,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String genre,
@@ -62,7 +64,10 @@ public class BookController {
             @RequestParam(required = false) String publisher,
             @RequestParam(required = false) String subtitle,
             @RequestParam(required = false) String title,
-            @RequestParam(required = false) String year
+            @RequestParam(required = false) String year,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "5") Integer size,
+            @RequestParam(defaultValue = "id") String sort
     ) {
         return bookRepository.findAll(
                 id,
@@ -74,7 +79,8 @@ public class BookController {
                 publisher,
                 subtitle,
                 title,
-                year
+                year,
+                PageRequest.of(from, size, Sort.by(sort))
         );
     }
 
@@ -164,12 +170,15 @@ public class BookController {
      * @return List of {@link Book} filtered with the params passed
      */
     @GetMapping("search")
-    public List<Book> findBooks(
+    public Page<Book> findBooks(
             @RequestParam(name = "publisher", required = false) String publisher,
             @RequestParam(name = "genre", required = false) String genre,
-            @RequestParam(name = "year", required = false) String year
+            @RequestParam(name = "year", required = false) String year,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "5") Integer size,
+            @RequestParam(defaultValue = "id") String sort
     ) {
-        return bookRepository.findAllByPublisherAndGenreAndYear(publisher, genre, year);
+        return bookRepository.findAllByPublisherAndGenreAndYear(publisher, genre, year, PageRequest.of(from, size, Sort.by(sort)));
     }
 
 }
