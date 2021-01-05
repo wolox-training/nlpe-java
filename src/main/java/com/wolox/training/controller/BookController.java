@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -35,13 +36,46 @@ public class BookController {
     private OpenLibraryService openLibraryService;
 
     /**
-     * This method return a collection of {@link Book}
+     * This method return a list of {@link Book} following the next Optional params:
      *
-     * @return Collection of {@link Book}
+     * @param id: The id of Book
+     * @param author: The author of Book
+     * @param genre: The Genre of Book
+     * @param image: The image or cover of Book
+     * @param isbn: The code of Book
+     * @param pages: The number of pages total of Book
+     * @param publisher: The entity of published of Book
+     * @param subtitle: The Subtitle of Book
+     * @param title: The title of Book
+     * @param year: The year of publish of Book
+     *
+     * @return The List of {@link Book} filtered with Optional parameters passed
      */
     @GetMapping
-    public Iterable<Book> findAll() {
-        return bookRepository.findAll();
+    public Iterable<Book> findAll(
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String image,
+            @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) Integer pages,
+            @RequestParam(required = false) String publisher,
+            @RequestParam(required = false) String subtitle,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String year
+    ) {
+        return bookRepository.findAll(
+                id,
+                author,
+                genre,
+                image,
+                isbn,
+                (Objects.nonNull(pages) && pages > 0) ? pages : 0,
+                publisher,
+                subtitle,
+                title,
+                year
+        );
     }
 
     /**
