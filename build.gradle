@@ -6,8 +6,10 @@ plugins {
 
 group = 'com.wolox'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '15'
-targetCompatibility = '15'
+java {
+	sourceCompatibility = JavaVersion.toVersion('15')
+	targetCompatibility = JavaVersion.toVersion('15')
+}
 
 repositories {
 	mavenCentral()
