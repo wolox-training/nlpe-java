@@ -3,6 +3,7 @@ package com.wolox.training.controller;
 import com.wolox.training.dto.BookDTO;
 import com.wolox.training.exception.BookIdMismatchException;
 import com.wolox.training.exception.BookNotFoundException;
+import com.wolox.training.exception.ExternalApiException;
 import com.wolox.training.models.Book;
 import com.wolox.training.repository.BookRepository;
 import com.wolox.training.service.OpenLibraryService;
@@ -95,7 +96,7 @@ public class BookController {
      * @throws BookNotFoundException: When book not found neither database nor external api
      */
     @GetMapping("{isbn}")
-    public ResponseEntity<BookDTO> findBookByIsbn(@PathVariable(name = "isbn") String isbn) throws IOException, BookNotFoundException {
+    public ResponseEntity<BookDTO> findBookByIsbn(@PathVariable(name = "isbn") String isbn) throws IOException, BookNotFoundException, ExternalApiException {
         Optional<Book> optionalBook = bookRepository.findByIsbn(isbn);
         if (optionalBook.isPresent()) {
             return ResponseEntity.ok(new BookDTO(optionalBook.get()));

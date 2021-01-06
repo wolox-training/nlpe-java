@@ -30,7 +30,7 @@ public class BookTest {
     private BookRepository bookRepository;
 
     private Book book;
-    private PageRequest page = PageRequest.of(0, 10);
+    private final PageRequest page = PageRequest.of(0, 10);
 
     @BeforeEach
     public void init() {

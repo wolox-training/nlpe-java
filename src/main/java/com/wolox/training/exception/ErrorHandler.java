@@ -48,7 +48,10 @@ public class ErrorHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler(IOException.class)
+    @ExceptionHandler({
+            IOException.class,
+            ExternalApiException.class
+    })
     private ResponseEntity<Response> handleServerError(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(ex.getMessage()));
     }

@@ -1,17 +1,13 @@
 package com.wolox.training.controller;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.wolox.training.dto.BookDTO;
-import com.wolox.training.exception.BookNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.repository.BookRepository;
 import com.wolox.training.service.AuthService;
 import com.wolox.training.service.OpenLibraryService;
-import org.json.JSONObject;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,7 +31,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,14 +42,13 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.framework;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(BookController.class)
+@Import(value = OpenLibraryService.class)
 public class BookControllerTest {
 
     @Autowired
@@ -63,17 +58,12 @@ public class BookControllerTest {
     private BookRepository bookRepository;
 
     @MockBean
-    private OpenLibraryService openLibraryService;
-
-    @MockBean
     private AuthService authService;
 
     @MockBean
     private PasswordEncoder passwordEncoder;
 
-    @Rule
-    private static WireMockRule wireMockRule = new WireMockRule(8080);
-    
+    public static WireMockServer wireMockServer;
     private final String PATH = "/api/book";
     private final String SPRING_USER = "spring";
     private final int id = 1;
@@ -99,13 +89,14 @@ public class BookControllerTest {
     }
 
     @BeforeAll
-    public static void beforeAll() {
-        wireMockRule.start();
+    public static void setup() {
+        wireMockServer = new WireMockServer(8090);
+        wireMockServer.start();
     }
 
     @AfterAll
-    public static void afterAll() {
-        wireMockRule.stop();
+    public static void teardown() {
+        wireMockServer.stop();
     }
 
     @WithMockUser(value = SPRING_USER)
@@ -138,15 +129,14 @@ public class BookControllerTest {
     @Test
     public void givenIsbn_whenGetBookByIsbn_thenCreateAndReturnBook() throws Exception {
 
-        stubFor(WireMock.get(urlEqualTo("https://openlibrary.org/api/books"))
+        Book b = this.mockBooks().get(0);
+        wireMockServer.stubFor(WireMock.get(urlEqualTo("/api/books?bibkeys=ISBN:" + b.getIsbn() + "&format=json&jscmd=data"))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
-                        .withBodyFile("mock/books.json")));
+                        .withBodyFile("books.json")));
 
-        Book b = this.mockBooks().get(0);
         BookDTO dto = new BookDTO(b);
         given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.empty());
-        given(openLibraryService.bookInfo(b.getIsbn())).willReturn(dto);
         given(bookRepository.save(b)).willReturn(b);
 
         mvc.perform(MockMvcRequestBuilders.get(PATH + "/" + b.getIsbn())
@@ -159,15 +149,14 @@ public class BookControllerTest {
     @Test
     public void givenIsbn_whenGetBookByIsbn_thenReturnBookNotFound() throws Exception {
 
-        stubFor(WireMock.get(urlEqualTo("https://openlibrary.org/api/books"))
+        Book b = this.mockBooks().get(0);
+        wireMockServer.stubFor(get(urlEqualTo("/api/books?bibkeys=ISBN:" + b.getIsbn() + "&format=json&jscmd=data"))
                 .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
                         .withStatus(HttpStatus.OK.value())
                         .withBody("{}")));
 
-        Book b = this.mockBooks().get(0);
         given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.empty());
-        given(openLibraryService.bookInfo(b.getIsbn())).willThrow(BookNotFoundException.class);
-
         mvc.perform(MockMvcRequestBuilders.get(PATH + "/" + b.getIsbn())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -183,7 +172,7 @@ public class BookControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(b.toString()))
                 .andExpect(status().isCreated())
-                .andExpect(res -> Assertions.assertEquals(b.toString(), res.getResponse().getContentAsString()));
+                .andExpect(res -> assertEquals(b.toString(), res.getResponse().getContentAsString()));
     }
 
     @Test
@@ -210,7 +199,7 @@ public class BookControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isOk())
-                .andExpect(res -> Assertions.assertEquals(b.toString(), res.getResponse().getContentAsString()));
+                .andExpect(res -> assertEquals(b.toString(), res.getResponse().getContentAsString()));
     }
 
     @WithMockUser(value = SPRING_USER)
