@@ -1,5 +1,8 @@
 package com.wolox.training.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.wolox.training.exception.BookAlreadyOwnedException;
 import io.swagger.annotations.ApiModel;
@@ -95,6 +98,7 @@ public class User {
         this.birthDate = Preconditions.checkNotNull(birthDate, "BirthDate must be not null");
     }
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getPassword() {
         return password;
     }
