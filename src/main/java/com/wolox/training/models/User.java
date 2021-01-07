@@ -1,12 +1,12 @@
 package com.wolox.training.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
 import com.wolox.training.exception.BookAlreadyOwnedException;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -35,25 +35,37 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
     private int id;
 
     @Column(nullable = false)
     @NotNull
+    @NonNull
+    @Getter
+    @Setter
     @ApiModelProperty(notes = "Username: Is the identifier of the user")
     private String username;
 
     @Column(nullable = false)
     @NotNull
+    @NonNull
+    @Getter
+    @Setter
     @ApiModelProperty(notes = "Name: Is the first name of the user")
     private String name;
 
     @Column(nullable = false)
     @NotNull
+    @NonNull
+    @Getter
+    @Setter
     @ApiModelProperty(notes = "BirthDate: Is the born date of te user")
     private LocalDate birthDate;
 
     @Column(nullable = false)
     @NotNull
+    @Setter
+    @NonNull
     @ApiModelProperty(notes = "Password: Is the password for authenticate user")
     private String password;
 
@@ -70,41 +82,9 @@ public class User {
         this.books = new ArrayList<>();
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = Preconditions.checkNotNull(username, "Username must be not null");
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = Preconditions.checkNotNull(name, "Name must be not null");
-    }
-
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = Preconditions.checkNotNull(birthDate, "BirthDate must be not null");
-    }
-
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = Preconditions.checkNotNull(password, "Password must be not null");
     }
 
     public List<Book> getBooks() {

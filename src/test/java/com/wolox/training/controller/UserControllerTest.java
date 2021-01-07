@@ -7,6 +7,7 @@ import com.wolox.training.repository.BookRepository;
 import com.wolox.training.repository.UserRepository;
 import com.wolox.training.service.AuthService;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -140,7 +141,11 @@ public class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(user.toString()))
                 .andExpect(status().isCreated())
-                .andExpect(res -> assertEquals(user.toString(), res.getResponse().getContentAsString()));
+                .andExpect(res -> {
+                    JSONObject json = new JSONObject(user.toString());
+                    json.remove("password");
+                    Assertions.assertEquals(json.toString(), new JSONObject(res.getResponse().getContentAsString()).toString());
+                });
     }
 
     @Test
@@ -167,7 +172,11 @@ public class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isOk())
-                .andExpect(res -> assertEquals(user.toString(), res.getResponse().getContentAsString()));
+                .andExpect(res -> {
+                    JSONObject json = new JSONObject(user.toString());
+                    json.remove("password");
+                    Assertions.assertEquals(json.toString(), new JSONObject(res.getResponse().getContentAsString()).toString());
+                });
     }
 
     @WithMockUser(value = SPRING_USER)
@@ -228,7 +237,11 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(res -> assertEquals(user.toString(), res.getResponse().getContentAsString()));
+                .andExpect(res -> {
+                    JSONObject json = new JSONObject(user.toString());
+                    json.remove("password");
+                    assertEquals(json.toString(), new JSONObject(res.getResponse().getContentAsString()).toString());
+                });
     }
 
     @WithMockUser(value = SPRING_USER)
@@ -280,7 +293,11 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(res -> assertEquals(user.toString(), res.getResponse().getContentAsString()));
+                .andExpect(res -> {
+                    JSONObject json = new JSONObject(user.toString());
+                    json.remove("password");
+                    assertEquals(json.toString(), new JSONObject(res.getResponse().getContentAsString()).toString());
+                });
     }
 
     @WithMockUser(value = SPRING_USER)

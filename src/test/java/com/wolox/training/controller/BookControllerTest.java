@@ -1,23 +1,27 @@
 package com.wolox.training.controller;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.wolox.training.dto.BookDTO;
-import com.wolox.training.exception.BookNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.repository.BookRepository;
 import com.wolox.training.service.AuthService;
 import com.wolox.training.service.OpenLibraryService;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,17 +37,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(BookController.class)
+@Import(value = OpenLibraryService.class)
 public class BookControllerTest {
 
     @Autowired
@@ -52,14 +58,12 @@ public class BookControllerTest {
     private BookRepository bookRepository;
 
     @MockBean
-    private OpenLibraryService openLibraryService;
-
-    @MockBean
     private AuthService authService;
 
     @MockBean
     private PasswordEncoder passwordEncoder;
 
+    public static WireMockServer wireMockServer;
     private final String PATH = "/api/book";
     private final String SPRING_USER = "spring";
     private final int id = 1;
@@ -84,6 +88,17 @@ public class BookControllerTest {
         given(passwordEncoder.matches(SPRING_PASSWORD, SPRING_PASSWORD)).willReturn(true);
     }
 
+    @BeforeAll
+    public static void setup() {
+        wireMockServer = new WireMockServer(8090);
+        wireMockServer.start();
+    }
+
+    @AfterAll
+    public static void teardown() {
+        wireMockServer.stop();
+    }
+
     @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBooks_whenGetAll_thenReturnArray() throws Exception {
@@ -92,7 +107,7 @@ public class BookControllerTest {
         Page<Book> page = new PageImpl<>(books, pageRequest, 10);
         given(bookRepository.findAll(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).willReturn(page);
 
-        mvc.perform(get(PATH)
+        mvc.perform(MockMvcRequestBuilders.get(PATH)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$['pageable']['paged']").value("true"));
@@ -104,7 +119,7 @@ public class BookControllerTest {
         Book b = this.mockBooks().get(0);
         given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.of(b));
 
-        mvc.perform(get(PATH + "/" + b.getIsbn())
+        mvc.perform(MockMvcRequestBuilders.get(PATH + "/" + b.getIsbn())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(res -> assertEquals(new BookDTO(b).toString(), res.getResponse().getContentAsString()));
@@ -113,13 +128,18 @@ public class BookControllerTest {
     @WithMockUser(value = SPRING_USER)
     @Test
     public void givenIsbn_whenGetBookByIsbn_thenCreateAndReturnBook() throws Exception {
+
         Book b = this.mockBooks().get(0);
+        wireMockServer.stubFor(WireMock.get(urlEqualTo("/api/books?bibkeys=ISBN:" + b.getIsbn() + "&format=json&jscmd=data"))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withBodyFile("books.json")));
+
         BookDTO dto = new BookDTO(b);
         given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.empty());
-        given(openLibraryService.bookInfo(b.getIsbn())).willReturn(dto);
         given(bookRepository.save(b)).willReturn(b);
 
-        mvc.perform(get(PATH + "/" + b.getIsbn())
+        mvc.perform(MockMvcRequestBuilders.get(PATH + "/" + b.getIsbn())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(res -> assertEquals(dto.toString(), res.getResponse().getContentAsString()));
@@ -128,11 +148,16 @@ public class BookControllerTest {
     @WithMockUser(value = SPRING_USER)
     @Test
     public void givenIsbn_whenGetBookByIsbn_thenReturnBookNotFound() throws Exception {
-        Book b = this.mockBooks().get(0);
-        given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.empty());
-        given(openLibraryService.bookInfo(b.getIsbn())).willThrow(BookNotFoundException.class);
 
-        mvc.perform(get(PATH + "/" + b.getIsbn())
+        Book b = this.mockBooks().get(0);
+        wireMockServer.stubFor(get(urlEqualTo("/api/books?bibkeys=ISBN:" + b.getIsbn() + "&format=json&jscmd=data"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(HttpStatus.OK.value())
+                        .withBody("{}")));
+
+        given(bookRepository.findByIsbn(b.getIsbn())).willReturn(Optional.empty());
+        mvc.perform(MockMvcRequestBuilders.get(PATH + "/" + b.getIsbn())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -142,12 +167,12 @@ public class BookControllerTest {
         Book b = this.mockBooks().get(0);
         given(bookRepository.save(any())).willReturn(b);
 
-        mvc.perform(post(PATH)
+        mvc.perform(MockMvcRequestBuilders.post(PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(b.toString()))
                 .andExpect(status().isCreated())
-                .andExpect(res -> Assertions.assertEquals(b.toString(), res.getResponse().getContentAsString()));
+                .andExpect(res -> assertEquals(b.toString(), res.getResponse().getContentAsString()));
     }
 
     @Test
@@ -155,7 +180,7 @@ public class BookControllerTest {
         Book b = this.mockBooks().get(0);
         given(bookRepository.save(any())).willThrow(DataIntegrityViolationException.class);
 
-        mvc.perform(post(PATH)
+        mvc.perform(MockMvcRequestBuilders.post(PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(b.toString()))
@@ -169,19 +194,19 @@ public class BookControllerTest {
         given(bookRepository.findById(id)).willReturn(Optional.of(b));
         given(bookRepository.save(any())).willReturn(b);
 
-        mvc.perform(put(PATH + "/" + id)
+        mvc.perform(MockMvcRequestBuilders.put(PATH + "/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(body))
                 .andExpect(status().isOk())
-                .andExpect(res -> Assertions.assertEquals(b.toString(), res.getResponse().getContentAsString()));
+                .andExpect(res -> assertEquals(b.toString(), res.getResponse().getContentAsString()));
     }
 
     @WithMockUser(value = SPRING_USER)
     @Test
     public void givenBookAndId_whenUpdateBook_thenReturnIdMissMatch() throws Exception {
 
-        mvc.perform(put(PATH + "/" + 50)
+        mvc.perform(MockMvcRequestBuilders.put(PATH + "/" + 50)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(body))
@@ -193,7 +218,7 @@ public class BookControllerTest {
     public void givenBookAndId_whenUpdateBook_thenReturnBookNotFound() throws Exception {
         given(bookRepository.findById(id)).willReturn(Optional.empty());
 
-        mvc.perform(put(PATH + "/" + id)
+        mvc.perform(MockMvcRequestBuilders.put(PATH + "/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(body))
@@ -208,7 +233,7 @@ public class BookControllerTest {
         given(bookRepository.findById(id)).willReturn(Optional.of(b));
         doNothing().when(bookRepository).deleteById(any());
 
-        mvc.perform(delete(PATH + "/" + id)
+        mvc.perform(MockMvcRequestBuilders.delete(PATH + "/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -220,7 +245,7 @@ public class BookControllerTest {
 
         given(bookRepository.findById(id)).willReturn(Optional.empty());
 
-        mvc.perform(delete(PATH + "/" + id)
+        mvc.perform(MockMvcRequestBuilders.delete(PATH + "/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
